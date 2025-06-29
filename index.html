@@ -549,34 +549,42 @@
 <body>
   <div class="container">
     <h2>AI绘画生成器</h2>
-    <input type="text" id="prompt" placeholder="请输入提示词..." />
-    <input type="file" id="imageInput" accept="image/*" />
-    
-    <div style="margin: 15px 0; padding: 15px; background: rgba(15, 17, 41, 0.5); border-radius: 8px;">
-      <div style="margin-bottom: 10px; font-family:'Rajdhani',sans-serif; font-weight:600; color:var(--text);">绘图模式</div>
-      <div style="display: flex; gap: 10px;">
-        <label class="mode-option has-badge">
-          <input type="radio" name="drawingMode" value="relax" checked>
-          <span>Relax</span>
-          <small>常规模式</small>
-          <div class="mode-badge yellow-badge">60-90s</div>
-        </label>
-        <label class="mode-option has-badge">
-          <input type="radio" name="drawingMode" value="fast">
-          <span>Fast</span>
-          <small>快速模式</small>
-          <div class="mode-badge green-badge">30-60s</div>
-        </label>
-        <label class="mode-option disabled" title="Turbo模式暂时不可用，成本较高">
-          <input type="radio" name="drawingMode" value="turbo" disabled>
-          <span>Turbo</span>
-          <small>极速模式</small>
-          <div class="disabled-badge">成本较高</div>
-        </label>
-      </div>
+    <div class="function-tabs" style="display:flex; margin-bottom:18px; gap:8px;">
+      <button id="tab-generate" class="tab-btn active" style="flex:1; padding:12px 0; font-size:16px; border:none; border-radius:6px 6px 0 0; background:var(--primary); color:#fff; font-weight:600;">生成图像</button>
+      <button id="tab-describe" class="tab-btn" style="flex:1; padding:12px 0; font-size:16px; border:none; border-radius:6px 6px 0 0; background:var(--card-bg); color:var(--text-secondary); font-weight:600;">图生文（Describe）</button>
     </div>
-    
-    <button id="submitBtn">生成图像</button>
+    <div id="generate-section">
+      <input type="text" id="prompt" placeholder="请输入提示词..." />
+      <input type="file" id="imageInput" accept="image/*" />
+      <div style="margin: 15px 0; padding: 15px; background: rgba(15, 17, 41, 0.5); border-radius: 8px;">
+        <div style="margin-bottom: 10px; font-family:'Rajdhani',sans-serif; font-weight:600; color:var(--text);">绘图模式</div>
+        <div style="display: flex; gap: 10px;">
+          <label class="mode-option has-badge">
+            <input type="radio" name="drawingMode" value="relax" checked>
+            <span>Relax</span>
+            <small>常规模式</small>
+            <div class="mode-badge yellow-badge">60-90s</div>
+          </label>
+          <label class="mode-option has-badge">
+            <input type="radio" name="drawingMode" value="fast">
+            <span>Fast</span>
+            <small>快速模式</small>
+            <div class="mode-badge green-badge">30-60s</div>
+          </label>
+          <label class="mode-option disabled" title="Turbo模式暂时不可用，成本较高">
+            <input type="radio" name="drawingMode" value="turbo" disabled>
+            <span>Turbo</span>
+            <small>极速模式</small>
+            <div class="disabled-badge">成本较高</div>
+          </label>
+        </div>
+      </div>
+      <button id="submitBtn">生成图像</button>
+    </div>
+    <div id="describe-section" style="display:none;">
+      <input type="file" id="describeImageInput" accept="image/*" />
+      <button id="describeBtn" style="margin-bottom:15px;width:100%;background:linear-gradient(45deg,#22e3dd,#3d5af1);font-weight:600;font-size:18px;height:50px;">图生文（Describe）</button>
+    </div>
     <div id="historyContainer" class="history-container"></div>
   </div>
   <script src="config.js"></script>
@@ -587,8 +595,36 @@
     const imageInput = document.getElementById('imageInput');
     const submitBtn = document.getElementById('submitBtn');
     const historyContainer = document.getElementById('historyContainer');
+    const describeBtn = document.getElementById('describeBtn');
+    const describeImageInput = document.getElementById('describeImageInput');
     
     let currentTaskId = null;
+
+    // Tab切换逻辑
+    const tabGenerate = document.getElementById('tab-generate');
+    const tabDescribe = document.getElementById('tab-describe');
+    const generateSection = document.getElementById('generate-section');
+    const describeSection = document.getElementById('describe-section');
+    tabGenerate.onclick = function() {
+      tabGenerate.classList.add('active');
+      tabDescribe.classList.remove('active');
+      tabGenerate.style.background = 'var(--primary)';
+      tabGenerate.style.color = '#fff';
+      tabDescribe.style.background = 'var(--card-bg)';
+      tabDescribe.style.color = 'var(--text-secondary)';
+      generateSection.style.display = '';
+      describeSection.style.display = 'none';
+    };
+    tabDescribe.onclick = function() {
+      tabDescribe.classList.add('active');
+      tabGenerate.classList.remove('active');
+      tabDescribe.style.background = 'var(--primary)';
+      tabDescribe.style.color = '#fff';
+      tabGenerate.style.background = 'var(--card-bg)';
+      tabGenerate.style.color = 'var(--text-secondary)';
+      generateSection.style.display = 'none';
+      describeSection.style.display = '';
+    };
 
     submitBtn.onclick = async function() {
       const prompt = promptInput.value.trim();
@@ -680,6 +716,51 @@
       } else {
         await sendRequest(prompt, base64Array, historyItem);
       }
+    };
+    
+    // Describe 图生文功能
+    describeBtn.onclick = async function() {
+      const file = describeImageInput.files[0];
+      if (!file) {
+        alert('请先选择一张图片');
+        return;
+      }
+      describeBtn.disabled = true;
+      // 创建历史项
+      const historyItem = createHistoryItem('图生文', '正在上传图片...');
+      const resultDiv = historyItem.querySelector('.result');
+      const progressBar = historyItem.querySelector('.progress-bar');
+      const progressInner = progressBar.querySelector('div');
+
+      // 读取图片为base64
+      const reader = new FileReader();
+      reader.onloadend = async function() {
+        const base64 = reader.result.split(',')[1];
+        resultDiv.textContent = '图片上传成功，正在提交Describe任务，时间较长，请耐心等待（20s）...';
+        // 提交describe任务
+        try {
+          const res = await fetch(API_URL + '/mj/submit/describe', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': API_TOKEN
+            },
+            body: JSON.stringify({ base64: 'data:image/png;base64,' + base64 })
+          });
+          const data = await res.json();
+          if (data && data.result) {
+            resultDiv.textContent = 'Describe任务已提交，正在生成描述...';
+            pollDescribeStatus(data.result, historyItem);
+          } else {
+            resultDiv.textContent = 'Describe提交失败：' + JSON.stringify(data);
+            describeBtn.disabled = false;
+          }
+        } catch (e) {
+          resultDiv.textContent = 'Describe请求异常：' + e;
+          describeBtn.disabled = false;
+        }
+      };
+      reader.readAsDataURL(file);
     };
     
     // 创建历史项
@@ -944,6 +1025,93 @@
           resultDiv.textContent = '查询任务异常：' + e;
         }
       }, intervalTime);
+    }
+
+    // 轮询Describe任务状态
+    function pollDescribeStatus(taskId, historyItem) {
+      const resultDiv = historyItem.querySelector('.result');
+      const progressBar = historyItem.querySelector('.progress-bar');
+      const progressInner = progressBar.querySelector('div');
+      let interval = setInterval(async () => {
+        progressBar.style.display = '';
+        progressInner.style.width = '80%';
+        try {
+          const res = await fetch(API_URL + `/mj/task/${taskId}/fetch`, {
+            method: 'GET',
+            headers: { 'Authorization': API_TOKEN }
+          });
+          const task = await res.json();
+          if (task) {
+            if (task.status === 'SUCCESS') {
+              clearInterval(interval);
+              progressInner.style.width = '100%';
+              setTimeout(()=>{progressBar.style.display='none';}, 800);
+
+              // 判断description是否为无效内容
+              function isInvalidDesc(desc) {
+                if (!desc) return true;
+                const invalids = ['提交成功', 'success', '已提交', 'successfully', ''];
+                return invalids.includes(desc.trim().toLowerCase());
+              }
+
+              let desc = '';
+              if (task.promptEn && task.promptEn.trim()) {
+                desc = task.promptEn.trim();
+              } else if (task.finalPrompt && task.finalPrompt.trim()) {
+                desc = task.finalPrompt.trim();
+              } else if (!isInvalidDesc(task.description)) {
+                desc = task.description.trim();
+              } else {
+                desc = '无描述返回';
+              }
+
+              // 判断是否为多条英文提示词（如promptEn有4条）
+              let html = '<div>图生文结果：</div>';
+              if (desc !== '无描述返回' && (desc.match(/^\d+️⃣/) || desc.split('\n').length >= 4)) {
+                // 按行分割，过滤空行
+                let lines = desc.split(/\n+/).filter(line => line.trim());
+                lines.forEach((line, idx) => {
+                  // 去除前缀序号和空格
+                  let text = line.replace(/^\d+️⃣\s*/, '');
+                  html += `<div style="display:flex;align-items:center;margin-bottom:6px;">
+                    <span class="description" id="describeText${idx}" style="white-space:pre-line;flex:1;">${text}</span>
+                    <button class="copyDescribeBtn" data-idx="${idx}" style="margin-left:8px;font-size:18px;cursor:pointer;background:none;border:none;">📋</button>
+                  </div>`;
+                });
+              } else {
+                html += `<div class="description" id="describeText0" style="white-space:pre-line;">${desc}</div>
+                  <button class="copyDescribeBtn" data-idx="0" style="margin-top:8px;font-size:18px;cursor:pointer;background:none;border:none;">📋</button>`;
+              }
+              resultDiv.innerHTML = html;
+              // 复制功能
+              const copyBtns = resultDiv.querySelectorAll('.copyDescribeBtn');
+              copyBtns.forEach(btn => {
+                btn.onclick = function() {
+                  const idx = btn.getAttribute('data-idx');
+                  const text = resultDiv.querySelector(`#describeText${idx}`).innerText;
+                  navigator.clipboard.writeText(text).then(()=>{
+                    btn.textContent = '✅';
+                    setTimeout(()=>{btn.textContent = '📋';}, 1200);
+                  });
+                };
+              });
+              describeBtn.disabled = false;
+            } else if (task.status === 'FAILURE') {
+              clearInterval(interval);
+              progressInner.style.width = '0';
+              setTimeout(()=>{progressBar.style.display='none';}, 800);
+              resultDiv.textContent = 'Describe生成失败：' + (task.failReason || '未知错误');
+              describeBtn.disabled = false;
+            } else {
+              resultDiv.textContent = 'Describe生成中... 当前状态：' + (task.status || '未知');
+            }
+          } else {
+            resultDiv.textContent = 'Describe任务查询失败：无效响应';
+          }
+        } catch (e) {
+          resultDiv.textContent = 'Describe任务查询异常：' + e;
+        }
+      }, 3000);
     }
 
     // 提交变化请求
