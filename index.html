@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI绘画网页</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #3d5af1;
+      --primary-light: #4e6af2;
+      --primary-dark: #2e48d0;
+      --accent: #22e3dd;
+      --accent-hover: #04f9f1;
+      --background: #0f1129;
+      --card-bg: #171b36;
+      --text: #eef1ff;
+      --text-secondary: #8d91b0;
+      --border: #252a48;
+      --success: #05d77e;
+      --error: #ff5367;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      background-color: var(--background);
+      color: var(--text);
+      font-family: 'Noto Sans SC', sans-serif;
+      line-height: 1.6;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+    
+    /* 科技网格背景 */
+    body::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        linear-gradient(rgba(62, 79, 233, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(62, 79, 233, 0.05) 1px, transparent 1px);
+      background-size: 25px 25px;
+      z-index: -1;
+      pointer-events: none;
+    }
+    
+    .container {
+      max-width: 700px;
+      margin: 40px auto;
+      padding: 30px;
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3), 
+                  0 0 0 1px rgba(255, 255, 255, 0.05), 
+                  0 0 20px rgba(61, 90, 241, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    /* 霓虹光边框效果 */
+    .container::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(45deg, var(--primary), var(--accent), var(--primary), var(--accent));
+      z-index: -1;
+      border-radius: 14px;
+      background-size: 400%;
+      animation: borderAnimation 8s linear infinite;
+      filter: blur(6px);
+      opacity: 0.6;
+    }
+    
+    @keyframes borderAnimation {
+      0% { background-position: 0 0; }
+      50% { background-position: 100% 0; }
+      100% { background-position: 0 0; }
+    }
+    
+    h2 {
+      text-align: center;
+      color: var(--text);
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      font-size: 32px;
+      margin-bottom: 25px;
+      position: relative;
+      letter-spacing: 1px;
+      text-shadow: 0 0 10px rgba(34, 227, 221, 0.6);
+    }
+    
+    h2::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      border-radius: 3px;
+    }
+    
+    input[type="text"] {
+      width: 100%;
+      margin-bottom: 15px;
+      padding: 14px;
+      font-size: 16px;
+      background: rgba(15, 17, 41, 0.8);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      transition: all 0.3s ease;
+      font-family: inherit;
+    }
+    
+    input[type="text"]:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(61, 90, 241, 0.25);
+    }
+    
+    input[type="file"] {
+      margin-bottom: 15px;
+      background: rgba(15, 17, 41, 0.8);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px;
+      width: 100%;
+      color: var(--text-secondary);
+      position: relative;
+    }
+    
+    input[type="file"]::file-selector-button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 15px;
+      transition: background 0.2s;
+    }
+    
+    input[type="file"]::file-selector-button:hover {
+      background: var(--primary-light);
+    }
+    
+    button {
+      padding: 12px 24px;
+      font-size: 16px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-weight: 500;
+      font-family: inherit;
+      letter-spacing: 0.5px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    button:hover {
+      background: var(--primary-light);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(46, 72, 208, 0.4);
+    }
+    
+    button:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 8px rgba(46, 72, 208, 0.4);
+    }
+    
+    button:disabled {
+      background: rgba(61, 90, 241, 0.5);
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+    
+    /* 按钮点击波浪效果 */
+    button::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 5px;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.5);
+      opacity: 0;
+      border-radius: 100%;
+      transform: scale(1, 1) translate(-50%);
+      transform-origin: 50% 50%;
+    }
+    
+    @keyframes ripple {
+      0% {
+        transform: scale(0, 0);
+        opacity: 0.5;
+      }
+      100% {
+        transform: scale(20, 20);
+        opacity: 0;
+      }
+    }
+    
+    button:focus:not(:active)::after {
+      animation: ripple 0.8s ease-out;
+    }
+    
+    .result {
+      margin-top: 20px;
+      white-space: pre-wrap;
+      word-break: break-all;
+      line-height: 1.6;
+      color: var(--text);
+    }
+    
+    /* 进度条样式 */
+    .progress-bar {
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 15px;
+    }
+    
+    .progress-bar div {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      transition: width 0.3s ease;
+      position: relative;
+    }
+    
+    .progress-bar div::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      animation: shimmer 1.5s infinite;
+    }
+    
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+    
+    .description {
+      margin-top: 15px;
+      background: rgba(15, 17, 41, 0.5);
+      padding: 15px;
+      border-radius: 8px;
+      border-left: 3px solid var(--accent);
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+    
+    /* 变化按钮样式 */
+    .variation-btns {
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      background: rgba(15, 17, 41, 0.5);
+      padding: 15px;
+      border-radius: 8px;
+    }
+    
+    .variation-btns button {
+      min-width: 50px;
+      font-size: 14px;
+      padding: 8px 12px;
+    }
+    
+    .variation-btns div {
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 600;
+    }
+    
+    .button-group {
+      display: flex;
+      gap: 5px;
+      flex: 1;
+    }
+    
+    .button-group button {
+      flex: 1;
+    }
+    
+    /* 小型按钮样式 */
+    .btn-small {
+      background: transparent;
+      border: 1px solid var(--primary);
+      color: var(--text);
+    }
+    
+    .btn-small:hover {
+      background: rgba(61, 90, 241, 0.1);
+    }
+    
+    .btn-u {
+      border-color: #4a58e8;
+      color: #4a58e8;
+    }
+    
+    .btn-v {
+      border-color: #22e3dd;
+      color: #22e3dd;
+    }
+    
+    .btn-reroll {
+      background: linear-gradient(90deg, #3d5af1, #22e3dd);
+      border: none;
+    }
+    
+    .history-item {
+      margin-top: 30px;
+      border-top: 1px solid var(--border);
+      padding-top: 30px;
+      position: relative;
+    }
+    
+    .history-label {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--card-bg);
+      padding: 0 15px;
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 1px;
+      font-family: 'Rajdhani', sans-serif;
+      text-transform: uppercase;
+    }
+    
+    .history-container {
+      margin-top: 30px;
+    }
+    
+    /* 图片效果 */
+    img {
+      border-radius: 8px;
+      transition: transform 0.3s ease;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    img:hover {
+      transform: scale(1.02);
+    }
+    
+    #submitBtn {
+      width: 100%;
+      background: linear-gradient(45deg, var(--primary), var(--accent));
+      background-size: 200% 200%;
+      animation: gradientBG 5s ease infinite;
+      font-weight: 600;
+      font-size: 18px;
+      height: 50px;
+    }
+    
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    
+    /* 加载完成的动画效果 */
+    .loaded-animation {
+      animation: successPulse 1s ease-out;
+    }
+    
+    @keyframes successPulse {
+      0% { box-shadow: 0 0 0 0 rgba(34, 227, 221, 0.7); }
+      70% { box-shadow: 0 0 0 15px rgba(34, 227, 221, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(34, 227, 221, 0); }
+    }
+    
+    /* 添加模式选择样式 */
+    .mode-option {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px;
+      background: rgba(15, 17, 41, 0.7);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      flex: 1;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    
+    .mode-option:hover {
+      border-color: var(--primary);
+      background: rgba(61, 90, 241, 0.1);
+    }
+    
+    .mode-option input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .mode-option span {
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 600;
+      font-size: 18px;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    
+    .mode-option small {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+    
+    .mode-option input[type="radio"]:checked + span {
+      color: var(--accent);
+    }
+    
+    .mode-option input[type="radio"]:checked ~ small {
+      color: var(--accent);
+    }
+    
+    /* 确保标签颜色不受选中状态影响 */
+    .mode-option input[type="radio"]:checked ~ .mode-badge,
+    .mode-option input[type="radio"]:checked ~ .disabled-badge {
+      /* 保持标签原有的颜色，不继承选中状态的颜色 */
+      color: white !important;
+    }
+    
+    .mode-option input[type="radio"]:checked ~ span::after {
+      content: "";
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--accent);
+    }
+    
+    .mode-option input[type="radio"]:checked + span::after {
+      content: "";
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--accent);
+    }
+    
+    .mode-option input[type="radio"]:checked ~ span::after {
+      content: "";
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--accent);
+    }
+    
+    .mode-option input[type="radio"]:checked ~ * {
+      color: var(--accent);
+    }
+    
+    /* 添加标签样式 */
+    .mode-option.has-badge {
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .mode-badge {
+      position: absolute;
+      top: 0;
+      right: 0;
+      color: white;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 0 4px 0 4px;
+      font-weight: 500;
+      z-index: 2;
+    }
+    
+    .yellow-badge {
+      background: #e67e22;
+      color: #ffffff;
+      text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+    }
+    
+    .green-badge {
+      background: #05d77e;
+    }
+    
+    /* 禁用模式样式 */
+    .mode-option.disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .mode-option.disabled::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.2);
+      z-index: 1;
+    }
+    
+    .disabled-badge {
+      position: absolute;
+      top: 0;
+      right: 0;
+      background: var(--error);
+      color: white;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 0 4px 0 4px;
+      z-index: 2;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>AI绘画生成器</h2>
+    <input type="text" id="prompt" placeholder="请输入提示词..." />
+    <input type="file" id="imageInput" accept="image/*" />
+    
+    <div style="margin: 15px 0; padding: 15px; background: rgba(15, 17, 41, 0.5); border-radius: 8px;">
+      <div style="margin-bottom: 10px; font-family:'Rajdhani',sans-serif; font-weight:600; color:var(--text);">绘图模式</div>
+      <div style="display: flex; gap: 10px;">
+        <label class="mode-option has-badge">
+          <input type="radio" name="drawingMode" value="relax" checked>
+          <span>Relax</span>
+          <small>常规模式</small>
+          <div class="mode-badge yellow-badge">60-90s</div>
+        </label>
+        <label class="mode-option has-badge">
+          <input type="radio" name="drawingMode" value="fast">
+          <span>Fast</span>
+          <small>快速模式</small>
+          <div class="mode-badge green-badge">30-60s</div>
+        </label>
+        <label class="mode-option disabled" title="Turbo模式暂时不可用，成本较高">
+          <input type="radio" name="drawingMode" value="turbo" disabled>
+          <span>Turbo</span>
+          <small>极速模式</small>
+          <div class="disabled-badge">成本较高</div>
+        </label>
+      </div>
+    </div>
+    
+    <button id="submitBtn">生成图像</button>
+    <div id="historyContainer" class="history-container"></div>
+  </div>
+  <script src="config.js"></script>
+  <script>
+    const API_URL = window.AI_CONFIG.API_URL;
+    const API_TOKEN = window.AI_CONFIG.API_TOKEN;
+    const promptInput = document.getElementById('prompt');
+    const imageInput = document.getElementById('imageInput');
+    const submitBtn = document.getElementById('submitBtn');
+    const historyContainer = document.getElementById('historyContainer');
+    
+    let currentTaskId = null;
+
+    submitBtn.onclick = async function() {
+      const prompt = promptInput.value.trim();
+      if (!prompt) {
+        alert('请输入提示词');
+        return;
+      }
+      
+      // 创建新的历史项
+      const historyItem = createHistoryItem('初始生成', prompt);
+      
+      // 测试模式 - 当输入lazymice时显示随机图片
+      if (prompt.toLowerCase() === 'lazymice') {
+        submitBtn.disabled = true;
+        const resultDiv = historyItem.querySelector('.result');
+        const progressBar = historyItem.querySelector('.progress-bar');
+        const progressInner = progressBar.querySelector('div');
+        
+        // 显示进度条模拟生成过程
+        progressBar.style.display = '';
+        let progress = 0;
+        const progressInterval = setInterval(() => {
+          progress += 5;
+          progressInner.style.width = `${progress}%`;
+          if (progress >= 100) {
+            clearInterval(progressInterval);
+            setTimeout(() => {
+              progressBar.style.display = 'none';
+              
+              // 随机选择一张图片
+              const randomImageId = Math.floor(Math.random() * 1000);
+              const imageUrl = `https://picsum.photos/seed/${randomImageId}/800/600`;
+              
+              // 显示随机图片和模拟描述
+              let resultHTML = `<div>生成成功：</div>`;
+              resultHTML += `<img src="${imageUrl}" alt="测试图片" style="max-width:100%;margin-top:10px;" class="loaded-animation" />`;
+              resultHTML += `<div class="description">这是一张测试图片，由lazymice测试模式生成。图片ID: ${randomImageId}</div>`;
+              
+              // 添加变化按钮
+              resultHTML += `<div class="variation-btns">
+                <div style="display:flex; align-items:center; margin-bottom:10px;">
+                  <div style="margin-right:10px; font-weight:bold; white-space:nowrap;">放大(UPSCALE)</div>
+                  <div class="button-group">`;
+              
+              // 放大按钮组 1-4
+              for (let i = 1; i <= 4; i++) {
+                resultHTML += `<button class="btn-small btn-u" onclick="submitChange('UPSCALE', ${i}, 'test-${Date.now()}')">U${i}</button>`;
+              }
+              
+              resultHTML += `</div></div>
+                <div style="display:flex; align-items:center; margin:10px 0;">
+                  <div style="margin-right:10px; font-weight:bold; white-space:nowrap;">变化(VARIATION)</div>
+                  <div class="button-group">`;
+              
+              // 变化按钮组 1-4
+              for (let i = 1; i <= 4; i++) {
+                resultHTML += `<button class="btn-small btn-v" onclick="submitChange('VARIATION', ${i}, 'test-${Date.now()}')">V${i}</button>`;
+              }
+              
+              resultHTML += `</div></div>
+                <div style="display:flex; align-items:center; margin:10px 0;">
+                  <div style="margin-right:10px; font-weight:bold; white-space:nowrap;">重新生成</div>
+                  <div class="button-group">
+                    <button class="btn-reroll" onclick="submitChange('REROLL', 1, 'test-${Date.now()}')">重新生成</button>
+                  </div>
+                </div>`;
+                
+              resultHTML += `</div>`;
+              
+              resultDiv.innerHTML = resultHTML;
+              submitBtn.disabled = false;
+            }, 500);
+          }
+        }, 150);
+        return;
+      }
+      
+      submitBtn.disabled = true;
+      
+      let base64Array = [];
+      const file = imageInput.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onloadend = async function() {
+          base64Array = [reader.result.split(',')[1]];
+          await sendRequest(prompt, base64Array, historyItem);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        await sendRequest(prompt, base64Array, historyItem);
+      }
+    };
+    
+    // 创建历史项
+    function createHistoryItem(title, details) {
+      const historyItem = document.createElement('div');
+      historyItem.className = 'history-item';
+      
+      const historyLabel = document.createElement('div');
+      historyLabel.className = 'history-label';
+      historyLabel.textContent = title;
+      historyItem.appendChild(historyLabel);
+      
+      const resultDiv = document.createElement('div');
+      resultDiv.className = 'result';
+      resultDiv.textContent = `提示词: ${details}\n生成中...`;
+      historyItem.appendChild(resultDiv);
+      
+      const progressBar = document.createElement('div');
+      progressBar.className = 'progress-bar';
+      progressBar.style.display = 'none';
+      
+      const progressInner = document.createElement('div');
+      progressInner.id = 'progressInner-' + Date.now();
+      progressInner.style.height = '100%';
+      progressInner.style.width = '0';
+      
+      progressBar.appendChild(progressInner);
+      historyItem.appendChild(progressBar);
+      
+      historyContainer.insertBefore(historyItem, historyContainer.firstChild);
+      return historyItem;
+    }
+
+    async function sendRequest(prompt, base64Array, historyItem) {
+      const resultDiv = historyItem.querySelector('.result');
+      const progressBar = historyItem.querySelector('.progress-bar');
+      const progressInner = progressBar.querySelector('div');
+      
+      // 获取当前选择的绘图模式
+      const drawingMode = document.querySelector('input[name="drawingMode"]:checked').value;
+      
+      try {
+        // 如果有上传图片，先上传图片获取URL
+        let imageUrl = null;
+        if (base64Array.length > 0 && imageInput.files[0]) {
+          resultDiv.textContent = `提示词: ${prompt}\n正在上传图片...`;
+          try {
+            // 使用FormData直接上传文件
+            const formData = new FormData();
+            formData.append('file', imageInput.files[0]);
+            
+            const uploadRes = await fetch(API_URL + '/v1/files', {
+              method: 'POST',
+              headers: {
+                'Authorization': API_TOKEN
+              },
+              body: formData
+            });
+            
+            const uploadData = await uploadRes.json();
+            if (uploadData && uploadData.url) {
+              imageUrl = uploadData.url;
+              resultDiv.textContent = `提示词: ${prompt}\n图片上传成功，正在生成...`;
+              
+              // 将图片URL添加到提示词后面，中间加空格
+              prompt = `${prompt} ${imageUrl}`;
+              resultDiv.textContent += `\n新提示词: ${prompt}`;
+            } else {
+              resultDiv.textContent = `提示词: ${prompt}\n图片上传失败: ${JSON.stringify(uploadData)}`;
+              submitBtn.disabled = false;
+              return;
+            }
+          } catch (uploadErr) {
+            resultDiv.textContent = `提示词: ${prompt}\n图片上传异常: ${uploadErr}`;
+            submitBtn.disabled = false;
+            return;
+          }
+        }
+        
+        // 根据不同的绘图模式，选择不同的API接入点前缀
+        let apiPrefix = '';
+        if (drawingMode === 'fast') {
+          apiPrefix = '/mj-fast';
+          resultDiv.textContent += `\n已选择Fast模式`;
+        } else if (drawingMode === 'turbo') {
+          apiPrefix = '/mj-turbo';  // 如果文档中没有明确指出turbo模式的前缀，这里假设是/mj-turbo
+          resultDiv.textContent += `\n已选择Turbo模式`;
+        } else {
+          apiPrefix = '/mj-relax';  // 默认为relax模式
+          resultDiv.textContent += `\n已选择Relax模式`;
+        }
+        
+        // 组装请求体
+        const body = { prompt };
+        
+        // 发送请求到对应模式的API接入点
+        const res = await fetch(API_URL + apiPrefix + '/mj/submit/imagine', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': API_TOKEN
+          },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if (data && data.result) {
+          resultDiv.textContent = `提示词: ${prompt}\n任务已提交，正在生成...（${drawingMode}模式）`;
+          currentTaskId = data.result;
+          pollTaskStatus(data.result, historyItem);
+        } else {
+          resultDiv.textContent = `提示词: ${prompt}\n提交失败：${JSON.stringify(data)}`;
+          submitBtn.disabled = false;
+        }
+      } catch (e) {
+        resultDiv.textContent = `提示词: ${prompt}\n请求失败：${e}`;
+        submitBtn.disabled = false;
+      }
+    }
+
+    // 轮询任务状态
+    function pollTaskStatus(taskId, historyItem) {
+      const resultDiv = historyItem.querySelector('.result');
+      const progressBar = historyItem.querySelector('.progress-bar');
+      const progressInner = progressBar.querySelector('div');
+      
+      // 保存创建任务时的绘图模式，确保后续查询使用相同的模式
+      const drawingMode = document.querySelector('input[name="drawingMode"]:checked').value;
+      
+      let totalTime = 30; // 默认30秒
+      let intervalTime = 3000; // 默认3秒查询一次
+      let estimatedSteps = totalTime / (intervalTime / 1000);
+      
+      let intervalCount = 0;
+      let interval = setInterval(async () => {
+        intervalCount++;
+        // 进度条显示并更新
+        progressBar.style.display = '';
+        let percent = Math.min(95, (intervalCount / estimatedSteps) * 100);
+        progressInner.style.width = percent + '%';
+        try {
+          // 根据当前的绘图模式确定API前缀
+          let apiPrefix = '';
+          if (drawingMode === 'fast') {
+            apiPrefix = '/mj-fast';
+          } else if (drawingMode === 'turbo') {
+            apiPrefix = '/mj-turbo';
+          } else {
+            apiPrefix = '/mj-relax';
+          }
+          
+          // 使用新的任务查询API
+          const res = await fetch(API_URL + apiPrefix + `/mj/task/${taskId}/fetch`, {
+            method: 'GET',
+            headers: {
+              'Authorization': API_TOKEN
+            }
+          });
+          
+          const task = await res.json();
+          
+          // 处理响应数据
+          if (task) {
+            if (task.status === 'SUCCESS') {
+              clearInterval(interval);
+              progressInner.style.width = '100%';
+              setTimeout(()=>{progressBar.style.display='none';}, 800);
+              
+              // 显示图片、描述和变化按钮
+              let resultHTML = `<div>生成成功：</div>`;
+              resultHTML += `<img src="${task.imageUrl}" alt="AI绘画结果" style="max-width:100%;margin-top:10px;" class="loaded-animation" />`;
+              
+              // 添加描述信息
+              if (task.description) {
+                resultHTML += `<div class="description">${task.description}</div>`;
+              }
+              
+              // 添加变化按钮
+              resultHTML += `<div class="variation-btns">
+                <div style="display:flex; align-items:center; margin-bottom:10px;">
+                  <div style="margin-right:10px; font-weight:bold; white-space:nowrap;">放大(UPSCALE)</div>
+                  <div class="button-group">`;
+              
+              // 放大按钮组 1-4
+              for (let i = 1; i <= 4; i++) {
+                resultHTML += `<button class="btn-small btn-u" onclick="submitChange('UPSCALE', ${i}, '${task.id}')">U${i}</button>`;
+              }
+              
+              resultHTML += `</div></div>
+                <div style="display:flex; align-items:center; margin:10px 0;">
+                  <div style="margin-right:10px; font-weight:bold; white-space:nowrap;">变化(VARIATION)</div>
+                  <div class="button-group">`;
+              
+              // 变化按钮组 1-4
+              for (let i = 1; i <= 4; i++) {
+                resultHTML += `<button class="btn-small btn-v" onclick="submitChange('VARIATION', ${i}, '${task.id}')">V${i}</button>`;
+              }
+              
+              resultHTML += `</div></div>
+                <div style="display:flex; align-items:center; margin:10px 0;">
+                  <div style="margin-right:10px; font-weight:bold; white-space:nowrap;">重新生成</div>
+                  <div class="button-group">
+                    <button class="btn-reroll" onclick="submitChange('REROLL', 1, '${task.id}')">重新生成</button>
+                  </div>
+                </div>`;
+                
+              resultHTML += `</div>`;
+              
+              resultDiv.innerHTML = resultHTML;
+              submitBtn.disabled = false;
+            } else if (task.status === 'FAILURE') {
+              clearInterval(interval);
+              progressInner.style.width = '0';
+              setTimeout(()=>{progressBar.style.display='none';}, 800);
+              resultDiv.textContent = '生成失败：' + (task.failReason || '未知错误');
+              submitBtn.disabled = false;
+            } else {
+              // 显示当前状态和描述信息
+              let statusText = '生成中... 当前状态：' + (task.status || '未知');
+              
+              // 将进度百分比放在状态右侧
+              if (task.progress) {
+                statusText = `<div style="display:flex; justify-content:space-between; align-items:center;">
+                  <div>生成中... 当前状态：${task.status || '未知'}</div>
+                  <div style="font-family:'Rajdhani',sans-serif; font-size:20px; font-weight:bold;">
+                    <span style="color:var(--accent);">${task.progress}</span> 完成
+                  </div>
+                </div>`;
+              }
+              
+              // 如果有描述信息，处理并调整进度条时间
+              if (task.description) {
+                statusText += `<div class="description">${task.description}</div>`;
+                
+                // 判断排队数量
+                const queueMatch = task.description.match(/前面还有(\d+)张排队/);
+                if (queueMatch) {
+                  const queueCount = parseInt(queueMatch[1], 10);
+                  // 根据排队数量调整总时间和预计步数
+                  if (!isNaN(queueCount)) {
+                    const newTotalTime = queueCount * 30; // 每张图30秒
+                    
+                    // 只在首次检测到排队信息时更新，避免重复调整
+                    if (totalTime === 30) { // 还是默认值时才更新
+                      totalTime = newTotalTime;
+                      estimatedSteps = totalTime / (intervalTime / 1000);
+                      console.log(`检测到${queueCount}张图片排队，预计等待时间: ${totalTime}秒`);
+                    }
+                  }
+                }
+                
+                // 更新进度条，考虑已经过去的时间
+                percent = Math.min(95, (intervalCount / estimatedSteps) * 100);
+                progressInner.style.width = percent + '%';
+              }
+              
+              resultDiv.innerHTML = statusText;
+            }
+          } else {
+            resultDiv.textContent = '查询任务失败：无效的响应数据';
+          }
+        } catch (e) {
+          resultDiv.textContent = '查询任务异常：' + e;
+        }
+      }, intervalTime);
+    }
+
+    // 提交变化请求
+    function submitChange(action, index, taskId) {
+      // 创建包含操作类型和序号的历史项
+      const operationTypes = {
+        'UPSCALE': '放大',
+        'VARIATION': '变化', 
+        'REROLL': '重新生成'
+      };
+      
+      const historyItem = createHistoryItem(`${operationTypes[action]} ${index}`, `基于上一张图片的${operationTypes[action]}操作`);
+      
+      const resultDiv = historyItem.querySelector('.result');
+      submitBtn.disabled = true;
+      
+      handleChange(action, index, taskId, historyItem);
+    }
+    
+    // 处理变化请求
+    async function handleChange(action, index, taskId, historyItem) {
+      const resultDiv = historyItem.querySelector('.result');
+      const progressBar = historyItem.querySelector('.progress-bar');
+      const progressInner = progressBar.querySelector('div');
+      
+      // 获取当前选择的绘图模式
+      const drawingMode = document.querySelector('input[name="drawingMode"]:checked').value;
+      
+      try {
+        // 根据当前的绘图模式确定API前缀
+        let apiPrefix = '';
+        if (drawingMode === 'fast') {
+          apiPrefix = '/mj-fast';
+        } else if (drawingMode === 'turbo') {
+          apiPrefix = '/mj-turbo';
+        } else {
+          apiPrefix = '/mj-relax';
+        }
+        
+        const body = {
+          action: action,
+          index: index,
+          taskId: taskId
+        };
+        
+        const res = await fetch(API_URL + apiPrefix + '/mj/submit/change', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': API_TOKEN
+          },
+          body: JSON.stringify(body)
+        });
+        
+        const data = await res.json();
+        if (data && data.result) {
+          resultDiv.textContent = '变化请求已提交，正在处理...';
+          currentTaskId = data.result;  // 更新为新的任务ID
+          pollTaskStatus(data.result, historyItem);
+        } else {
+          resultDiv.textContent = '变化请求失败：' + JSON.stringify(data);
+          submitBtn.disabled = false;
+        }
+      } catch (e) {
+        resultDiv.textContent = '变化请求异常：' + e;
+        submitBtn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html> 
