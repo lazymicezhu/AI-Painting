@@ -37,6 +37,7 @@
       min-height: 100vh;
       position: relative;
       overflow-x: hidden;
+      padding: 10px;
     }
     
     /* 科技网格背景 */
@@ -56,16 +57,127 @@
     }
     
     .container {
-      max-width: 700px;
-      margin: 40px auto;
-      padding: 30px;
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 40px;
       background: var(--card-bg);
-      border-radius: 12px;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3), 
-                  0 0 0 1px rgba(255, 255, 255, 0.05), 
-                  0 0 20px rgba(61, 90, 241, 0.2);
+      border-radius: 16px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 
+                  0 0 0 1px rgba(255, 255, 255, 0.08), 
+                  0 0 30px rgba(61, 90, 241, 0.3);
       position: relative;
       overflow: hidden;
+      backdrop-filter: blur(10px);
+    }
+    
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+      body {
+        padding: 5px;
+      }
+      
+      .container {
+        margin: 10px auto;
+        padding: 20px;
+        border-radius: 12px;
+      }
+      
+      h2 {
+        font-size: 28px;
+        margin-bottom: 20px;
+      }
+      
+      input[type="text"], input[type="file"] {
+        padding: 15px;
+        font-size: 16px;
+      }
+      
+      button {
+        padding: 12px 20px;
+        font-size: 15px;
+      }
+      
+      #submitBtn, #describeBtn {
+        height: 50px;
+        font-size: 16px;
+      }
+      
+      .mode-option {
+        padding: 12px;
+      }
+      
+      .mode-option span {
+        font-size: 16px;
+      }
+      
+      .function-tabs button {
+        padding: 12px 0;
+        font-size: 16px;
+      }
+      
+      .variation-btns {
+        padding: 15px;
+        gap: 12px;
+      }
+      
+      .description {
+        padding: 15px;
+        font-size: 13px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .container {
+        padding: 15px;
+      }
+      
+      h2 {
+        font-size: 24px;
+      }
+      
+      .function-tabs {
+        flex-direction: column;
+        gap: 8px;
+      }
+      
+      .function-tabs button {
+        border-radius: 8px;
+      }
+      
+      .mode-option {
+        padding: 10px;
+      }
+      
+      .mode-option span {
+        font-size: 14px;
+      }
+      
+      .mode-option small {
+        font-size: 11px;
+      }
+      
+      .variation-btns {
+        padding: 12px;
+      }
+      
+      .variation-btns button {
+        padding: 6px 8px;
+        font-size: 12px;
+      }
+      
+      .variation-btns > div {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .variation-btns > div > div:first-child {
+        min-width: auto;
+        margin-bottom: 5px;
+      }
+      
+      .button-group {
+        width: 100%;
+      }
     }
     
     /* 霓虹光边框效果 */
@@ -96,11 +208,15 @@
       color: var(--text);
       font-family: 'Rajdhani', sans-serif;
       font-weight: 700;
-      font-size: 32px;
-      margin-bottom: 25px;
+      font-size: 36px;
+      margin-bottom: 30px;
       position: relative;
-      letter-spacing: 1px;
-      text-shadow: 0 0 10px rgba(34, 227, 221, 0.6);
+      letter-spacing: 1.2px;
+      text-shadow: 0 0 15px rgba(34, 227, 221, 0.8);
+      background: linear-gradient(45deg, var(--text), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
     
     h2::after {
@@ -117,32 +233,39 @@
     
     input[type="text"] {
       width: 100%;
-      margin-bottom: 15px;
-      padding: 14px;
+      margin-bottom: 20px;
+      padding: 18px;
       font-size: 16px;
-      background: rgba(15, 17, 41, 0.8);
-      border: 1px solid var(--border);
-      border-radius: 6px;
+      background: rgba(15, 17, 41, 0.9);
+      border: 2px solid transparent;
+      border-radius: 12px;
       color: var(--text);
       transition: all 0.3s ease;
       font-family: inherit;
+      backdrop-filter: blur(5px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     }
     
     input[type="text"]:focus {
       outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(61, 90, 241, 0.25);
+      border: 2px solid var(--primary);
+      box-shadow: 0 0 0 4px rgba(61, 90, 241, 0.25), 
+                  0 8px 25px rgba(61, 90, 241, 0.15);
+      transform: translateY(-2px);
     }
     
     input[type="file"] {
-      margin-bottom: 15px;
-      background: rgba(15, 17, 41, 0.8);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 10px;
+      margin-bottom: 20px;
+      background: rgba(15, 17, 41, 0.9);
+      border: 2px solid transparent;
+      border-radius: 12px;
+      padding: 15px;
       width: 100%;
       color: var(--text-secondary);
       position: relative;
+      backdrop-filter: blur(5px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
     }
     
     input[type="file"]::file-selector-button {
@@ -161,25 +284,26 @@
     }
     
     button {
-      padding: 12px 24px;
+      padding: 15px 30px;
       font-size: 16px;
       background: var(--primary);
       color: white;
       border: none;
-      border-radius: 6px;
+      border-radius: 12px;
       cursor: pointer;
-      transition: all 0.2s ease;
-      font-weight: 500;
+      transition: all 0.3s ease;
+      font-weight: 600;
       font-family: inherit;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.8px;
       position: relative;
       overflow: hidden;
+      box-shadow: 0 6px 20px rgba(61, 90, 241, 0.3);
     }
     
     button:hover {
       background: var(--primary-light);
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(46, 72, 208, 0.4);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(46, 72, 208, 0.5);
     }
     
     button:active {
@@ -266,24 +390,28 @@
     }
     
     .description {
-      margin-top: 15px;
-      background: rgba(15, 17, 41, 0.5);
-      padding: 15px;
-      border-radius: 8px;
-      border-left: 3px solid var(--accent);
+      margin-top: 20px;
+      background: rgba(15, 17, 41, 0.7);
+      padding: 18px;
+      border-radius: 12px;
+      border-left: 4px solid var(--accent);
       font-size: 14px;
       color: var(--text-secondary);
+      backdrop-filter: blur(5px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     }
     
     /* 变化按钮样式 */
     .variation-btns {
-      margin-top: 20px;
+      margin-top: 25px;
       display: flex;
       flex-direction: column;
-      gap: 15px;
-      background: rgba(15, 17, 41, 0.5);
-      padding: 15px;
-      border-radius: 8px;
+      gap: 18px;
+      background: rgba(15, 17, 41, 0.7);
+      padding: 20px;
+      border-radius: 12px;
+      backdrop-filter: blur(5px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     }
     
     .variation-btns button {
@@ -297,10 +425,23 @@
       font-weight: 600;
     }
     
+    .variation-btns > div {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    
+    .variation-btns > div > div:first-child {
+      min-width: 100px;
+      white-space: nowrap;
+    }
+    
     .button-group {
       display: flex;
       gap: 5px;
       flex: 1;
+      flex-wrap: wrap;
     }
     
     .button-group button {
@@ -334,25 +475,28 @@
     }
     
     .history-item {
-      margin-top: 30px;
-      border-top: 1px solid var(--border);
-      padding-top: 30px;
+      margin-top: 35px;
+      border-top: 2px solid var(--border);
+      padding-top: 35px;
       position: relative;
+      backdrop-filter: blur(5px);
     }
     
     .history-label {
       position: absolute;
-      top: -12px;
+      top: -15px;
       left: 50%;
       transform: translateX(-50%);
       background: var(--card-bg);
-      padding: 0 15px;
+      padding: 0 20px;
       color: var(--text-secondary);
       font-size: 14px;
-      font-weight: 500;
-      letter-spacing: 1px;
+      font-weight: 600;
+      letter-spacing: 1.2px;
       font-family: 'Rajdhani', sans-serif;
       text-transform: uppercase;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
     }
     
     .history-container {
@@ -361,13 +505,14 @@
     
     /* 图片效果 */
     img {
-      border-radius: 8px;
-      transition: transform 0.3s ease;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
     }
     
     img:hover {
-      transform: scale(1.02);
+      transform: scale(1.03);
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.5);
     }
     
     #submitBtn {
@@ -375,9 +520,11 @@
       background: linear-gradient(45deg, var(--primary), var(--accent));
       background-size: 200% 200%;
       animation: gradientBG 5s ease infinite;
-      font-weight: 600;
+      font-weight: 700;
       font-size: 18px;
-      height: 50px;
+      height: 55px;
+      border-radius: 12px;
+      box-shadow: 0 8px 25px rgba(61, 90, 241, 0.4);
     }
     
     @keyframes gradientBG {
@@ -402,19 +549,23 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 12px;
-      background: rgba(15, 17, 41, 0.7);
-      border: 1px solid var(--border);
-      border-radius: 8px;
+      padding: 16px;
+      background: rgba(15, 17, 41, 0.8);
+      border: 2px solid transparent;
+      border-radius: 12px;
       cursor: pointer;
       flex: 1;
-      transition: all 0.2s ease;
+      transition: all 0.3s ease;
       position: relative;
+      backdrop-filter: blur(5px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     }
     
     .mode-option:hover {
-      border-color: var(--primary);
-      background: rgba(61, 90, 241, 0.1);
+      border: 2px solid var(--primary);
+      background: rgba(61, 90, 241, 0.15);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(61, 90, 241, 0.3);
     }
     
     .mode-option input[type="radio"] {
@@ -498,9 +649,9 @@
       right: 0;
       color: white;
       font-size: 10px;
-      padding: 2px 6px;
-      border-radius: 0 4px 0 4px;
-      font-weight: 500;
+      padding: 3px 8px;
+      border-radius: 0 8px 0 8px;
+      font-weight: 600;
       z-index: 2;
     }
     
@@ -549,16 +700,16 @@
 <body>
   <div class="container">
     <h2>AI绘画生成器</h2>
-    <div class="function-tabs" style="display:flex; margin-bottom:18px; gap:8px;">
-      <button id="tab-generate" class="tab-btn active" style="flex:1; padding:12px 0; font-size:16px; border:none; border-radius:6px 6px 0 0; background:var(--primary); color:#fff; font-weight:600;">生成图像</button>
-      <button id="tab-describe" class="tab-btn" style="flex:1; padding:12px 0; font-size:16px; border:none; border-radius:6px 6px 0 0; background:var(--card-bg); color:var(--text-secondary); font-weight:600;">图生文（Describe）</button>
+    <div class="function-tabs" style="display:flex; margin-bottom:25px; gap:12px; flex-wrap: wrap;">
+      <button id="tab-generate" class="tab-btn active" style="flex:1; padding:15px 0; font-size:17px; border:none; border-radius:12px 12px 0 0; background:var(--primary); color:#fff; font-weight:600; box-shadow: 0 4px 15px rgba(61, 90, 241, 0.3); transition: all 0.3s ease;">生成图像</button>
+      <button id="tab-describe" class="tab-btn" style="flex:1; padding:15px 0; font-size:17px; border:none; border-radius:12px 12px 0 0; background:var(--card-bg); color:var(--text-secondary); font-weight:600; transition: all 0.3s ease;">图生文（Describe）</button>
     </div>
     <div id="generate-section">
       <input type="text" id="prompt" placeholder="请输入提示词..." />
       <input type="file" id="imageInput" accept="image/*" />
-      <div style="margin: 15px 0; padding: 15px; background: rgba(15, 17, 41, 0.5); border-radius: 8px;">
-        <div style="margin-bottom: 10px; font-family:'Rajdhani',sans-serif; font-weight:600; color:var(--text);">绘图模式</div>
-        <div style="display: flex; gap: 10px;">
+      <div style="margin: 20px 0; padding: 20px; background: rgba(15, 17, 41, 0.7); border-radius: 12px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); backdrop-filter: blur(5px);">
+        <div style="margin-bottom: 15px; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:18px; color:var(--text);">绘图模式</div>
+        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
           <label class="mode-option has-badge">
             <input type="radio" name="drawingMode" value="relax" checked>
             <span>Relax</span>
@@ -583,7 +734,7 @@
     </div>
     <div id="describe-section" style="display:none;">
       <input type="file" id="describeImageInput" accept="image/*" />
-      <button id="describeBtn" style="margin-bottom:15px;width:100%;background:linear-gradient(45deg,#22e3dd,#3d5af1);font-weight:600;font-size:18px;height:50px;">图生文（Describe）</button>
+      <button id="describeBtn" style="margin-bottom:20px;width:100%;background:linear-gradient(45deg,#22e3dd,#3d5af1);font-weight:700;font-size:18px;height:55px;border-radius:12px;box-shadow: 0 6px 20px rgba(34, 227, 221, 0.3);transition: all 0.3s ease;">图生文（Describe）</button>
     </div>
     <div id="historyContainer" class="history-container"></div>
   </div>
@@ -610,8 +761,10 @@
       tabDescribe.classList.remove('active');
       tabGenerate.style.background = 'var(--primary)';
       tabGenerate.style.color = '#fff';
+      tabGenerate.style.boxShadow = '0 4px 15px rgba(61, 90, 241, 0.3)';
       tabDescribe.style.background = 'var(--card-bg)';
       tabDescribe.style.color = 'var(--text-secondary)';
+      tabDescribe.style.boxShadow = 'none';
       generateSection.style.display = '';
       describeSection.style.display = 'none';
     };
@@ -620,8 +773,10 @@
       tabGenerate.classList.remove('active');
       tabDescribe.style.background = 'var(--primary)';
       tabDescribe.style.color = '#fff';
+      tabDescribe.style.boxShadow = '0 4px 15px rgba(61, 90, 241, 0.3)';
       tabGenerate.style.background = 'var(--card-bg)';
       tabGenerate.style.color = 'var(--text-secondary)';
+      tabGenerate.style.boxShadow = 'none';
       generateSection.style.display = 'none';
       describeSection.style.display = '';
     };
